@@ -1,8 +1,8 @@
 #include "Arduino.h"
 #include <Wire.h>
 #include <U8g2lib.h>
-#include <Adafruit_TinyUSB.h>
-
+#include "Adafruit_TinyUSB.h"
+//#include "MPGS.h"
 #include "ButtonConfig.h"
 #include "DisplayConfig.h"
 
@@ -14,14 +14,19 @@ bool upFiltered, downFiltered, leftFiltered, rightFiltered;
 bool square, triangle, r1, l1, cross, circle, r2, l2;
 
 //Mode selects
-int socdMode, gamepadMode;
+int socdMode, inputMode;
 
 //Display
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C display(U8G2_R0, U8X8_PIN_NONE); //U8G2_SSD1306_96X40_F_HW_I2C(rotation, [reset [, clock, data]]) [full framebuffer, size = 480 bytes]
 
-void socdOutputXInput();
+//HID stuff
+uint8_t const desc_hid_report[] = {
+  TUD_HID_REPORT_DESC_GAMEPAD()
+};
+Adafruit_USBD_HID usb_hid;
+hid_gamepad_report_t gp;
 
-void socdOutput(); // Filtered SOCD output
+void socdOutputPad(); // Filtered SOCD output to padhack
 void socdStandard(); // L+R = N | U+D = U
 void socdAlternative(); // L+R = N | U+D = N
 void socdRaw(); // Raw inputs
@@ -31,6 +36,14 @@ void displayStatusBar();
 void displayInputs(bool*, bool*);
 
 void setup() {
+    Serial.begin(115200);
+    usb_hid.setPollInterval(2);
+    usb_hid.setReportDescriptor(desc_hid_report, sizeof(desc_hid_report));
+    usb_hid.begin();
+        // wait until device mounted
+    while( !TinyUSBDevice.mounted() ) delay(1);
+    Serial.println("DEVICE MOUNTED");
+
     //Initialize DPAD inputs and outputs
     pinMode(UPIN, INPUT_PULLUP);
     pinMode(DOWNIN, INPUT_PULLUP);
@@ -46,15 +59,15 @@ void setup() {
     upFiltered = downFiltered = leftFiltered = rightFiltered = false;
 
     //Initialize Button inputs
-    pinMode(SQUAREIN, INPUT);
-    pinMode(TRIANGLEIN, INPUT);
-    pinMode(R1IN, INPUT);
-    pinMode(L1IN, INPUT);
+    pinMode(SQUAREIN, INPUT_PULLUP);
+    pinMode(TRIANGLEIN, INPUT_PULLUP);
+    pinMode(R1IN, INPUT_PULLUP);
+    pinMode(L1IN, INPUT_PULLUP);
 
-    pinMode(CROSSIN, INPUT);
-    pinMode(CIRCLEIN, INPUT);
-    pinMode(R2IN, INPUT);
-    pinMode(L2IN, INPUT);
+    pinMode(CROSSIN, INPUT_PULLUP);
+    pinMode(CIRCLEIN, INPUT_PULLUP);
+    pinMode(R2IN, INPUT_PULLUP);
+    pinMode(L2IN, INPUT_PULLUP);
     
     //Initialize I2C and display
     Wire.begin();
@@ -79,10 +92,16 @@ void setup() {
         socdMode = 1; //Standard SOCD by default
     }
 
+    #if defined(ARDUINO_ARCH_MBED) && defined(ARDUINO_ARCH_RP2040)
+        // Manual begin() is required on core without built-in support for TinyUSB such as mbed rp2040
+        TinyUSB_Device_Init(0);
+    #endif
+
     //Initialize Gamepad mode
-    gamepadMode = 0;
-    if(gamepadMode == 0){
-    }
+    inputMode = 0;
+    //if(inputMode == 0){
+        
+    //}
 }
 void loop() {
     display.clearBuffer();
@@ -119,11 +138,34 @@ void loop() {
         default:
             break;
     }
+
     
-    if(gamepadMode == 0){
-        //socdOutputXInput();
+    if(inputMode == 0){
+        gp.hat     = 0;
+        gp.buttons = 0;
+        if(!usb_hid.ready() ) return;
+        if (upFiltered && !rightFiltered && !leftFiltered) gp.hat = 1; // UP
+        else if (upFiltered && rightFiltered) gp.hat = 2; // UP RIGHT
+        else if (rightFiltered && !upFiltered && !downFiltered) gp.hat = 3; // RIGHT
+        else if (downFiltered && rightFiltered) gp.hat = 4; // DOWN RIGHT
+        else if (downFiltered && !rightFiltered && !leftFiltered) gp.hat = 5; // DOWN
+        else if (downFiltered && leftFiltered) gp.hat = 6; // DOWN LEFT
+        else if (leftFiltered && !upFiltered && !downFiltered) gp.hat = 7; // LEFT
+        else if (upFiltered && leftFiltered) gp.hat = 8; // UP LEFT
+        else gp.hat = 0; // CENTERED
+
+        if (square) gp.buttons |= (1U << 0);   
+        if (triangle) gp.buttons |= (1U << 1); 
+        if (r1) gp.buttons |= (1U << 2);       
+        if (l1) gp.buttons |= (1U << 3);
+        if (cross) gp.buttons |= (1U << 4);
+        if (circle) gp.buttons |= (1U << 5);
+        if (r2) gp.buttons |= (1U << 6);
+        if (l2) gp.buttons |= (1U << 7);
+
+        usb_hid.sendReport(0, &gp, sizeof(gp));
     }
-    socdOutput();
+    socdOutputPad();
 
     //Update Display
     displayGamepad();
@@ -131,7 +173,7 @@ void loop() {
     display.sendBuffer();
 }
 
-void socdOutput(){
+void socdOutputPad(){
     pinMode(UPOUT, upFiltered ? OUTPUT : INPUT);
     digitalWrite(UPOUT, upFiltered ? LOW : HIGH);
     

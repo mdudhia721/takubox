@@ -1,7 +1,7 @@
 #ifndef BUTTONCONSTANTS_H
 #define BUTTONCONSTANTS_H
 
-//DPAD constants
+//DPAD pins
 #define UPIN 19
 #define DOWNIN 18
 #define LEFTIN 17
@@ -12,7 +12,7 @@
 #define LEFTOUT 14
 #define RIGHTOUT 15
 
-//Button constants
+//Button pins
 #define SQUAREIN 0
 #define TRIANGLEIN 1
 #define R1IN 2
