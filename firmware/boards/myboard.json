@@ -7,7 +7,7 @@
           "usb_vid": "0x2e8a",
           "usb_pid": "0x000a",
           "usb_manufacturer": "mdudhia721",
-          "usb_product": "Takubox"        
+          "usb_product": "testnamebox"        
         }
       },
       "core": "arduino",
