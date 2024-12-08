@@ -1,8 +1,11 @@
 #include "gamepad.h"
 
+void reset() {
+    SCB_AIRCR = 0x05FA0004; //Reset Teensy
+}
+
 void Gamepad::setup() {
     // Map pin inputs to the gamepad state, set pins as input pullup
-    Serial.println("starting setup");
     dpadMaps = new ButtonMap*[DPAD_INPUT_COUNT];
     buttonMaps = new ButtonMap*[BUTTON_INPUT_COUNT];
     //Joystick.button
@@ -16,6 +19,10 @@ void Gamepad::setup() {
         buttonMaps[i] = new ButtonMap(BUTTON_PINS[i], BUTTON_STATE_MASKS[i]);
         pinMode(buttonMaps[i]->pin, INPUT_PULLUP);
     }
+
+    //reset interrupt
+    pinMode(PIN_RESET, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(PIN_RESET), reset, FALLING);
 
     setupConfig();
     display.setup();

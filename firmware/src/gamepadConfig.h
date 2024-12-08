@@ -5,6 +5,8 @@
 
 const int DEBOUNCE_TIME = 5;
 
+const unsigned int PIN_RESET = 33;
+
 //TODO make pins into ports
 const unsigned int PIN_U = 34;
 const unsigned int PIN_D = 35;
