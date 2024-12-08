@@ -81,6 +81,11 @@ void GamepadOutput::outputHIDButtons(uint16_t buttons) {
     }
 }
 
+//Need seperate constants since L3 and R3 are active Hi
+const unsigned int L3_OUT = 27;
+const unsigned int R3_OUT = 28;
+
+//Todo padhack output
 void GamepadOutput::outputPadhack(GamepadState* state) {
 
 }

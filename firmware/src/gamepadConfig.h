@@ -37,6 +37,9 @@ const unsigned int BUTTON_PINS[BUTTON_INPUT_COUNT] = {
     PIN_L3,     PIN_R3
 };
 
+const unsigned int L3_OUT = 27;
+const unsigned int R3_OUT = 28;
+
 enum socdMode {
     SOCD_UP,
     SOCD_NEUTRAL,
