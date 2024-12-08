@@ -5,6 +5,7 @@ void Gamepad::setup() {
     Serial.println("starting setup");
     dpadMaps = new ButtonMap*[DPAD_INPUT_COUNT];
     buttonMaps = new ButtonMap*[BUTTON_INPUT_COUNT];
+    //Joystick.button
 
     // Initialize all button maps
     for (int i = 0; i < DPAD_INPUT_COUNT; i++) {
@@ -16,7 +17,7 @@ void Gamepad::setup() {
         pinMode(buttonMaps[i]->pin, INPUT_PULLUP);
     }
 
-    loadConfig();
+    setupConfig();
     display.setup();
 }
 
@@ -38,65 +39,70 @@ void Gamepad::read() {
 }
 
 void Gamepad::process() {
-    cleanSOCD();
+    processSOCD();
 }
 
 void Gamepad::output() {
+    if (config.socdMode == OUTPUT_HID) {
+        outputter.outputHID(&state);
+    }
+    if (config.socdMode == OUTPUT_PADHACK) {
+        outputter.outputPadhack(&state);
+    }
     display.displayGamepad(&state, &config);
 }
 
-void Gamepad::loadConfig() {
+void Gamepad::setupConfig() {
     // Setup default configuration
     config.socdMode = SOCD_UP;
     config.displayMode = DISPLAY_JOYSTICK;
+    config.outputMode = OUTPUT_HID;
 
-    // Check inputs to set SOCD mode and display mode
+    // Check inputs to set SOCD mode, display mode, and outputmode
     read();
     if (state.dpad & DPAD_STATE_MASKS[U]) {
-        config.socdMode = SOCD_UP;
-    } else if (state.dpad & DPAD_STATE_MASKS[D]) {
         config.socdMode = SOCD_NEUTRAL;
-    } else if (state.dpad & DPAD_STATE_MASKS[L]) {
+    } else if (state.dpad & DPAD_STATE_MASKS[D]) {
         config.socdMode = SOCD_RAW;
     }
 
     if (state.buttons & BUTTON_STATE_MASKS[A]) {
-        config.displayMode = DISPLAY_JOYSTICK;
-    } else if (state.buttons & BUTTON_STATE_MASKS[B]) {
         config.displayMode = DISPLAY_WASD;
-    } else if (state.buttons & BUTTON_STATE_MASKS[X]) {
+    } else if (state.buttons & BUTTON_STATE_MASKS[B]) {
         config.displayMode = DISPLAY_DPAD;
     }
+
+    if (state.buttons & BUTTON_STATE_MASKS[X]) {
+        config.outputMode = OUTPUT_PADHACK;
+    }
+
 }
 
-void Gamepad::cleanSOCD() {
-    uint8_t currentDPAD = state.dpad;
-
+void Gamepad::processSOCD() {
     // Handle U+D filtering
     switch (config.socdMode) {
-        case SOCD_NEUTRAL:
-            if ((currentDPAD & DPAD_STATE_MASKS[U]) && (currentDPAD & DPAD_STATE_MASKS[D])) {
+        case SOCD_NEUTRAL: //U+D=N
+            if ((state.dpad & DPAD_STATE_MASKS[U]) && (state.dpad & DPAD_STATE_MASKS[D])) {
                 state.dpad &= ~(DPAD_STATE_MASKS[U] | DPAD_STATE_MASKS[D]); // Clear both
             }
             break;
 
-        case SOCD_UP:
-            if ((currentDPAD & DPAD_STATE_MASKS[U]) && (currentDPAD & DPAD_STATE_MASKS[D])) {
+        case SOCD_UP: //U+D=U
+            if ((state.dpad & DPAD_STATE_MASKS[U]) && (state.dpad & DPAD_STATE_MASKS[D])) {
                 state.dpad &= ~DPAD_STATE_MASKS[D]; // Clear down
             }
             break;
 
-        case SOCD_RAW:
-            // Do nothing
+        case SOCD_RAW:// Do nothing
             break;
 
         default:
             break;
     }
 
-    // Handle L+R filtering
+    // Handle L+R filtering, L+R=N
     if (config.socdMode != SOCD_RAW) {
-        if ((currentDPAD & DPAD_STATE_MASKS[L]) && (currentDPAD & DPAD_STATE_MASKS[R])) {
+        if ((state.dpad & DPAD_STATE_MASKS[L]) && (state.dpad & DPAD_STATE_MASKS[R])) {
             state.dpad &= ~(DPAD_STATE_MASKS[L] | DPAD_STATE_MASKS[R]); // Clear both
         }
     }

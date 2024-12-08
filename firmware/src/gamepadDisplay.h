@@ -20,6 +20,7 @@ class GamepadDisplay {
         
         void setup();
 
+        //TODO: Low priority, change methods so they only rely on their correspdoning part of state, not all of state. Directionals only uses dpad, buttons only uses buttons, etc. 
         void displayGamepad(GamepadState *state, GamepadConfig *config);
         void displayMainButtons(GamepadState *state);
         void displaySecondaryButtons(GamepadState *state);
@@ -32,6 +33,7 @@ class GamepadDisplay {
 
         void displayStatusBar(GamepadConfig *config);
         void displaySOCDMode(GamepadConfig *config);
+        void displayOutputMode(GamepadConfig *config);
 };
 
 #endif

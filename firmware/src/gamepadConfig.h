@@ -5,6 +5,7 @@
 
 const int DEBOUNCE_TIME = 5;
 
+//TODO make pins into ports
 const unsigned int PIN_U = 34;
 const unsigned int PIN_D = 35;
 const unsigned int PIN_L = 36;
@@ -46,9 +47,17 @@ enum displayMode {
     DISPLAY_WASD
 };
 
+enum outputMode {
+    OUTPUT_HID,
+    OUTPUT_PADHACK
+};
+
 struct GamepadConfig {
     uint8_t socdMode;
     uint8_t displayMode;
+    uint8_t outputMode;
+    
+    GamepadConfig() : socdMode(SOCD_UP), displayMode(DISPLAY_JOYSTICK), outputMode(OUTPUT_HID) {}
 };
 
 #endif

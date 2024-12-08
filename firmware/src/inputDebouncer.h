@@ -1,5 +1,5 @@
-#ifndef INPUT_DEBOUNCER_H
-#define INPUT_DEBOUNCER_H
+#ifndef INPUTDEBOUNCER_H
+#define INPUTDEBOUNCER_H
 
 #include "gamepadConfig.h"
 

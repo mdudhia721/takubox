@@ -192,7 +192,20 @@ void GamepadDisplay::displaySOCDMode(GamepadConfig *config) {
     }
 }
 
+// Output configuration
+const int OUTPUT_X0 = 124;
+const int OUTPUT_Y0 = 64;
+
+void GamepadDisplay::displayOutputMode(GamepadConfig *config) {
+    if (config->outputMode == OUTPUT_HID) {
+        screen.drawStr(OUTPUT_X0 - screen.getStrWidth("HID"), OUTPUT_Y0, "HID");
+    } else if (config->outputMode == OUTPUT_PADHACK) {
+        screen.drawStr(OUTPUT_X0 - screen.getStrWidth("PADHACK"), OUTPUT_Y0, "PADHACK");
+    }
+}
+
 // Display status bar
 void GamepadDisplay::displayStatusBar(GamepadConfig *config) {
     displaySOCDMode(config);
+    displayOutputMode(config);
 }

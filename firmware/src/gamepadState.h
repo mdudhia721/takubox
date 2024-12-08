@@ -4,6 +4,8 @@
 //Sets up objects and constants needed for Gamepad class.
 #include <Arduino.h>
 
+//NEXT: ANALOG STUFF
+
 // Input count constants
 const int DPAD_INPUT_COUNT = 4; //U, D, L, R
 const int MAIN_INPUT_COUNT = 8; //A, B, X, Y, L1, R1, L2, R2
@@ -22,6 +24,7 @@ const uint8_t DPAD_STATE_MASKS[DPAD_INPUT_COUNT] = {
     STATE_MASK_L, 
     STATE_MASK_R
 };
+
 //Indexes for different buttons in the array
 enum dpadIndex {U, D, L, R, UL, UR, DL, DR};
 
@@ -45,7 +48,8 @@ const uint16_t BUTTON_STATE_MASKS[BUTTON_INPUT_COUNT] = {
     STATE_MASK_HOME,    STATE_MASK_TOUCH,   STATE_MASK_START,   STATE_MASK_SELECT,
     STATE_MASK_L3,      STATE_MASK_R3
 };
-//indexes for button state masks
+
+// Indexes for buttons
 enum {A, B, X, Y, L1, R1, L2, R2, HOME, TOUCH, START, SELECT, L3, R3};
 
 // Analog range constatns
