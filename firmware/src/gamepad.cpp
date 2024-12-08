@@ -16,6 +16,8 @@ void Gamepad::setup() {
         pinMode(buttonMaps[i]->pin, INPUT_PULLUP);
     }
 
+    setupConfig();
+    display.setup();
 }
 
 void Gamepad::read() {
@@ -36,5 +38,21 @@ void Gamepad::process() {
 }
 
 void Gamepad::output() {
+    display.displayGamepad(&state, &config);
+}
+
+void Gamepad::setupConfig() {
+    //Setup default configuration
+    config.socdMode = SOCD_UP;
+    config.displayMode = DISPLAY_JOYSTICK;
     
+    //Check inputs to set SOCD mode and display mode
+    read();
+    if (state.dpad & DPAD_STATE_MASKS[U]) { config.socdMode = SOCD_UP; }
+    else if (state.dpad & DPAD_STATE_MASKS[D]) { config.socdMode = SOCD_NEUTRAL; }
+    else if (state.dpad & DPAD_STATE_MASKS[L]) { config.socdMode = SOCD_RAW; }
+
+    if (state.buttons & BUTTON_STATE_MASKS[A]) { config.displayMode = DISPLAY_JOYSTICK; }
+    else if (state.buttons & BUTTON_STATE_MASKS[B]) { config.displayMode = DISPLAY_WASD; }
+    else if (state.buttons & BUTTON_STATE_MASKS[X]) { config.displayMode = DISPLAY_DPAD; }
 }
