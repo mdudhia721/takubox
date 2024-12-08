@@ -23,7 +23,7 @@ const uint8_t DPAD_STATE_MASKS[DPAD_INPUT_COUNT] = {
     STATE_MASK_R
 };
 //Indexes for different buttons in the array
-enum dpadIndex {U, D, L, R};
+enum dpadIndex {U, D, L, R, UL, UR, DL, DR};
 
 const uint16_t STATE_MASK_A =        (1 << 0);
 const uint16_t STATE_MASK_B =        (1 << 1);

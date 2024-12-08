@@ -28,10 +28,10 @@ class Gamepad {
 
         void setup(); //Setups virtual gamepad on Microcontroller
         void read(); //Reads inputs, fills state 
-        void process(); //Processes state for debouncing, SOCD cleaning
+        void process(); //Any post-read processing, including SOCD cleaning
         void output(); //Uses processed state to output state to system and display
 
-        void setupConfig(); //Setups configuration options, used in setup()
+        void loadConfig(); //Loads configuration options, used in setup()
         void cleanSOCD(); //Cleans SOCD, used in process()
 };
 
